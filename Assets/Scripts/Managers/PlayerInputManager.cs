@@ -1,12 +1,13 @@
+using System;
 using UnityEngine;
 
 public class PlayerInputManager : MonoBehaviour
 {
     public float HorizontalValue { get; private set; }
-    //public bool IsActive { get; private set; }
-    public bool IsActive;
-
+    public bool IsActive { get; private set; } = true;
+   
     public static PlayerInputManager Instance;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -18,31 +19,64 @@ public class PlayerInputManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    private void Start()
+    private void OnEnable()
     {
-        ToggleIsActive();
+        ActionController.OpenKickForceUI += ToggleIsActive;
+        ActionController.OnLevelRestart += ToggleIsActive;
+    }
+
+    private void OnDisable()
+    {
+        ActionController.OpenKickForceUI -= ToggleIsActive;
+        ActionController.OnLevelRestart -= ToggleIsActive;
     }
 
     void Update()
     {
-        HandleHeroHorizontalInput();
+        if (IsActive)
+        {
+            HandleHeroHorizontalInput();
+        }
+        else
+        {
+            if (Input.touchCount > 0)
+            {
+                Touch touch = Input.GetTouch(0);
+                switch (touch.phase)
+                {
+                    case TouchPhase.Began:
+                        ActionController.IncreaseKickForce?.Invoke();
+                        break;
+
+
+                }
+                //IncreaseKickForce();
+            }
+            HorizontalValue = 0;
+        }
     }
 
     private void HandleHeroHorizontalInput()
     {
-        if (Input.touchCount > 0 && IsActive)
+        if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
 
             if (touch.phase == TouchPhase.Moved)
             {
-                HorizontalValue = touch.deltaPosition.x * 15f * Time.deltaTime;
+                HorizontalValue = touch.deltaPosition.x * 3f * Time.deltaTime;
+                return;
             }
         }
-        else
+
+        if (Input.GetMouseButton(0))
         {
-            HorizontalValue = 0;
+            float deltaX = Input.GetAxis("Mouse X");
+            HorizontalValue = deltaX * 500f * Time.deltaTime;
+            return;
         }
+
+        HorizontalValue = 0;
     }
 
     public void ToggleIsActive()
@@ -50,3 +84,23 @@ public class PlayerInputManager : MonoBehaviour
         IsActive = !IsActive;
     }
 }
+public static partial class ActionController
+{
+    public static Action OpenKickForceUI;
+    public static Action IncreaseKickForce;
+}
+
+
+//if (Input.touchCount > 0 && IsActive)
+//{
+//    Touch touch = Input.GetTouch(0);
+
+//    if (touch.phase == TouchPhase.Moved)
+//    {
+//        HorizontalValue = touch.deltaPosition.x * 15f * Time.deltaTime;
+//    }
+//}
+//else
+//{
+//    HorizontalValue = 0;
+//}

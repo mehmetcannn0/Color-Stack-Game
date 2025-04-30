@@ -1,6 +1,5 @@
-using UnityEngine;
-public interface IStackable
+ public interface IStackable
 {
     void OnStack();
-    Material GetMaterial();
+    MaterialType GetMaterialType();
 }

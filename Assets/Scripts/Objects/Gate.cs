@@ -1,17 +1,38 @@
 
 using UnityEngine;
 
-public class Gate : MonoBehaviour , IColorGate
+public class Gate : MonoBehaviour, IColorGate
 {
-    [SerializeField] private Material gateMaterial;
+    private MeshRenderer gateRenderer;
+    public MaterialType MaterialType;
+
     private void Awake()
     {
-        gateMaterial = GetComponent<Renderer>().material;
+        gateRenderer = GetComponent<MeshRenderer>();
     }
-    public Material GateMaterial()
+
+    private void Start()
     {
-        return gateMaterial;
+        switch (MaterialType)
+        {
+            case MaterialType.Red:
+                gateRenderer.material = MaterialManager.Instance.materials[0].material;
+                break;
+            case MaterialType.Green:
+                gateRenderer.material = MaterialManager.Instance.materials[1].material;
+                break;
+            case MaterialType.Blue:
+                gateRenderer.material = MaterialManager.Instance.materials[2].material;
+                break;
+            case MaterialType.Yellow:
+                gateRenderer.material = MaterialManager.Instance.materials[3].material;
+                break;
+        }
+
     }
- 
- 
+
+    public MaterialType GateMaterialType()
+    {
+        return MaterialType;
+    }
 }

@@ -3,9 +3,10 @@ using UnityEngine;
 public class CameraFollowController : MonoBehaviour
 {
     [SerializeField] private Transform playerTransform;
+    [SerializeField] private float lerpValue;
+
     private Vector3 cameraOffset;
     private Vector3 newPosition;
-    [SerializeField] private float lerpValue;
 
     void Start()
     {

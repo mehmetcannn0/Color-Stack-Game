@@ -1,7 +1,6 @@
-using UnityEngine;
-
 public interface IColorChangeable 
 {
-    void ChangeColor(Material material);
+    void OnCharged();
+    void OnUncharged();
 
 }

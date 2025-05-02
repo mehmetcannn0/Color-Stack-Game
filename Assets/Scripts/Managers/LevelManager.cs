@@ -1,16 +1,18 @@
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class LevelManager : MonoBehaviour
 {
-    [SerializeField] private Transform gateParents;
-    [SerializeField] private Transform blockParents;
+    [SerializeField] private Transform gateParent;
+    [SerializeField] private Transform blockParent;
     [SerializeField] private Transform stackParent;
 
-    PrefabManager prefabManager; 
+    PrefabManager prefabManager;
 
     void Start()
     {
-        prefabManager = PrefabManager.Instance; 
+        prefabManager = PrefabManager.Instance;
 
     }
 
@@ -31,10 +33,7 @@ public class LevelManager : MonoBehaviour
         ClearLevel();
 
         MaterialType gateMaterialType = MaterialType.Green;
-
-        int columnCount = 4;
-        float blockSpacing = 2.3f;
-        MaterialType[] columnMaterialTypes = new MaterialType[columnCount];
+        MaterialType[] columnMaterialTypes = new MaterialType[Utils.COLUMN_COUNT];
 
         for (float i = 0; i < 200; i += 1.5f)
         {
@@ -49,40 +48,62 @@ public class LevelManager : MonoBehaviour
 
                 gateMaterialType = (MaterialType)randomIndex;
 
-                for (int col = 0; col < columnCount; col++)
+                for (int col = 0; col < Utils.COLUMN_COUNT; col++)
                 {
                     columnMaterialTypes[col] = (MaterialType)Random.Range(0, 4);
                 }
+                if (!columnMaterialTypes.Contains(gateMaterialType))
+                { 
+                    int selectedColumnIndex = Random.Range(0, Utils.COLUMN_COUNT);
+                    columnMaterialTypes[selectedColumnIndex] = gateMaterialType;
+                }
 
-                GameObject gate = prefabManager.InstantiateObjet(prefabType: PrefabType.Gate, materialType: gateMaterialType, objectPosition: new Vector3(0f, 0f, i), parent: gateParents);
+                PlaceGate(gateMaterialType, i);
             }
             else
             {
-                for (int x = 0; x < columnCount; x++)
+                for (int x = 0; x < Utils.COLUMN_COUNT; x++)
                 {
                     MaterialType blockMaterialType = columnMaterialTypes[x];
 
-                    Vector3 blockPosition = new Vector3((x - 1.5f) * blockSpacing, 0f, i);
+                    Vector3 blockPosition = new Vector3((x - 1.5f) * Utils.BLOCK_HORIZONTAL_SPACE_SIZE, 0f, i);
 
-                    GameObject block = prefabManager.InstantiateObjet(prefabType: PrefabType.Block, materialType: blockMaterialType, chargedMaterialType: gateMaterialType, objectPosition: blockPosition, parent: blockParents);
+                    PlaceBlock(blockPosition, blockMaterialType, gateMaterialType);
                 }
             }
         }
     }
 
+    private void PlaceBlock(Vector3 blockPosition, MaterialType blockMaterialType, MaterialType gateMaterialType)
+    {
+        GameObject blockObject = prefabManager.InstantiateBlock(blockPosition, Quaternion.identity, blockParent);
+
+        Block block = blockObject.GetComponent<Block>();
+
+        block.Init(blockMaterialType, gateMaterialType);
+    }
+
+    private void PlaceGate(MaterialType materialType, float gatePositionIndex)
+    {
+        GameObject gateObject = prefabManager.InstantiateGate(new Vector3(0f, 0f, gatePositionIndex), Quaternion.identity, gateParent);
+
+        gateObject.GetComponent<Gate>().Init(materialType);
+    }
+
+
     public void ClearLevel()
     {
-        foreach (Transform child in gateParents)
+        foreach (Transform child in gateParent)
         {
             Destroy(child.gameObject);
         }
-        foreach (Transform child in blockParents)
+        foreach (Transform child in blockParent)
         {
             Destroy(child.gameObject);
         }
         foreach (Transform child in stackParent)
         {
             Destroy(child.gameObject);
-        } 
+        }
     }
 }

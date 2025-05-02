@@ -1,4 +1,4 @@
-using System; 
+using System;
 using UnityEngine;
 
 public class LevelController : MonoBehaviour
@@ -8,14 +8,12 @@ public class LevelController : MonoBehaviour
     public void StartLevel()
     {
         ActionController.OnLevelStart?.Invoke();
-        Debug.Log("Level Started");
     }
 
     public void RestartLevel()
     {
         ActionController.OnLevelRestart?.Invoke();
-         StartLevel();
-        Debug.Log("Level Restarted");
+        StartLevel();
     }
 }
 

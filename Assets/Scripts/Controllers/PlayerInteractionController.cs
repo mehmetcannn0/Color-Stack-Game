@@ -2,35 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerInteractionController : MonoBehaviour
+public class PlayerInteractionController : MonoSingleton<PlayerInteractionController>
 {
-    [SerializeField] private List<GameObject> playerObjects = new List<GameObject>();
+    [SerializeField] private List<GameObject> playerObjects;
     [SerializeField] private MaterialType stackBaseMaterialType;
     [SerializeField] private Transform stackParent;
 
     private MeshRenderer meshRenderer;
 
     private List<GameObject> stackList = new List<GameObject>();
-    private Vector3 stackOffset = new Vector3(0, 0.1f, 0);
     private bool isCharged = false;
 
     MaterialManager materialManager;
     GameManager gameManager;
 
-    public static PlayerInteractionController Instance;
-
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            //DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
 
     private void Start()
     {
@@ -65,45 +50,65 @@ public class PlayerInteractionController : MonoBehaviour
         {
             if (isCharged)
             {
-                stackable.OnStack();
-                gameManager.DecreaseChargeCount();
-                AddToStack(collision.gameObject);
-
-                ActionController.UpdateChargeLevelUI?.Invoke();
-
-                if (gameManager.chargeCount <= 0)
-                {
-                    transform.localScale = new Vector3(1.5f, 0.1f, 1);
-                    isCharged = false;
-                    ActionController.OnUncharged?.Invoke();
-                }
+                Oncharged(collision, stackable);
                 return;
             }
 
             if (stackBaseMaterialType == stackable.GetMaterialType())
             {
-                stackable.OnStack();
-                gameManager.IncreaseChargeCount();
-                AddToStack(collision.gameObject);
-                ActionController.UpdateChargeLevelUI?.Invoke();
+                StackBlock(collision, stackable);
 
-
-                if (gameManager.chargeCount == 30)
+                if (gameManager.ChargeCount == Utils.CHARGE_LEVEL_LIMIT)
                 {
-                    transform.localScale = new Vector3(8f, 0.1f, 1);
-
-                    isCharged = true;
-                    ActionController.OnCharged?.Invoke();
+                    SetActiveCharge();
                 }
             }
             else
             {
-                gameManager.DecreaseChargeCount(true);//chargeCount = 0f;
-                ActionController.UpdateChargeLevelUI?.Invoke();
-                RemoveFromStack();
-                Destroy(collision.gameObject);
+                DestroyBlock(collision);
             }
         }
+    }
+
+    private void DestroyBlock(Collision collision)
+    {
+        gameManager.DecreaseChargeCount(true);
+        ActionController.UpdateChargeLevelUI?.Invoke();
+        RemoveFromStack();
+        Destroy(collision.gameObject);
+    }
+
+    private void SetActiveCharge()
+    {
+        transform.localScale = Utils.CHARGED_STACK_BASE_SCALE;
+
+        isCharged = true;
+        ActionController.OnCharged?.Invoke();
+    }
+
+    private void StackBlock(Collision collision, IStackable stackable)
+    {
+        stackable.OnStack();
+        gameManager.IncreaseChargeCount();
+        AddToStack(collision.gameObject);
+        ActionController.UpdateChargeLevelUI?.Invoke();
+    }
+
+    private void Oncharged(Collision collision, IStackable stackable)
+    {
+        stackable.OnStack();
+        gameManager.DecreaseChargeCount();
+        AddToStack(collision.gameObject);
+
+        ActionController.UpdateChargeLevelUI?.Invoke();
+
+        if (gameManager.ChargeCount <= 0)
+        {
+            transform.localScale = Utils.STACK_BASE_SCALE;
+            isCharged = false;
+            ActionController.OnUncharged?.Invoke();
+        }
+        return;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -111,38 +116,18 @@ public class PlayerInteractionController : MonoBehaviour
         if (other.gameObject.TryGetComponent(out IColorGate colorGate))
         {
             MaterialType gateMaterialType = colorGate.GateMaterialType();
-            Material gateMaterial = meshRenderer.material;
-            switch (gateMaterialType)
-            {
-                case MaterialType.Red:
-                    gateMaterial = materialManager.materials[0].material;
-                    stackBaseMaterialType = materialManager.materials[0].materialType;
-                    break;
-                case MaterialType.Green:
-                    gateMaterial = materialManager.materials[1].material;
-                    stackBaseMaterialType = materialManager.materials[1].materialType;
-                    break;
-                case MaterialType.Blue:
-                    gateMaterial = materialManager.materials[2].material;
-                    stackBaseMaterialType = materialManager.materials[2].materialType;
-                    break;
-                case MaterialType.Yellow:
-                    gateMaterial = materialManager.materials[3].material;
-                    stackBaseMaterialType = materialManager.materials[3].materialType;
-                    break;
-                default:
-                    gateMaterial = materialManager.materials[0].material;
-                    stackBaseMaterialType = materialManager.materials[0].materialType;
-                    break;
-            }
 
-            meshRenderer.material = gateMaterial;
+            MaterialTypeData requestedMaterialData = materialManager.GetMaterialTypeData(gateMaterialType);
 
-            ActionController.OnGateInteracted?.Invoke(gateMaterial);
+            stackBaseMaterialType = requestedMaterialData.materialType;
+
+            meshRenderer.material = requestedMaterialData.material;
+
+            ActionController.OnGateInteracted?.Invoke(requestedMaterialData.material);
 
             foreach (GameObject obj in playerObjects)
             {
-                obj.GetComponent<Renderer>().material = gateMaterial;
+                obj.GetComponent<Renderer>().material = requestedMaterialData.material;
             }
         }
     }
@@ -150,7 +135,7 @@ public class PlayerInteractionController : MonoBehaviour
     void AddToStack(GameObject block)
     {
         block.transform.SetParent(stackParent);
-        Vector3 newPos = Vector3.up * stackList.Count * stackOffset.y;
+        Vector3 newPos = Vector3.up * stackList.Count * Utils.BLOCK_VERTICAL_SPACE_SIZE.y;
         block.transform.localPosition = newPos;
         stackList.Add(block);
     }
@@ -166,9 +151,9 @@ public class PlayerInteractionController : MonoBehaviour
     }
 
     private void ClearStackList()
-    { 
+    {
         stackList.Clear();
         isCharged = false;
-        transform.localScale = new Vector3(1.5f, 0.1f, 1);
+        transform.localScale = Utils.STACK_BASE_SCALE;
     }
 }

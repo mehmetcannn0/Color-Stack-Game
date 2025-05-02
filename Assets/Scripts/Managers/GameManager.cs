@@ -1,22 +1,9 @@
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+public class GameManager : MonoSingleton<GameManager>
 { 
-    public float chargeCount { get; private set; }
-    public float KickForce { get; private set; } = 0f;
-
-    public static GameManager Instance;
-
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
+    public float ChargeCount { get; private set; }
+    public float KickForce { get; private set; } = 0f; 
 
     private void OnEnable()
     { 
@@ -37,28 +24,24 @@ public class GameManager : MonoBehaviour
 
     public void IncreaseChargeCount()
     {
-        chargeCount+=3;
+        ChargeCount+=3f;
     }
 
     public void DecreaseChargeCount(bool isReset = false)
     {
         if (isReset)
         {
-            chargeCount = 0;
+            ChargeCount = 0f;
             return;
         }
-        chargeCount -=1;
+        ChargeCount -=1f;
     }
 
     public void ResetValues()
     {
-        chargeCount = 0;
+        ChargeCount = 0f;
         KickForce = 0f;
         ActionController.UpdateChargeLevelUI?.Invoke(); 
     }
-
-    public void ResetKickForce()
-    {
-        KickForce = 0f;
-    }
+ 
 }

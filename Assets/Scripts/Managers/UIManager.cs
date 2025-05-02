@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIManager : MonoBehaviour
+public class UIManager : MonoSingleton<UIManager>
 {
     [SerializeField] private Slider chargeLevel;
     [SerializeField] private Slider kickForce;
@@ -11,23 +11,9 @@ public class UIManager : MonoBehaviour
 
     GameManager gameManager;
 
-    public static UIManager Instance;
-
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
-
     private void Start()
     {
         gameManager = GameManager.Instance;
-
     }
 
     private void OnEnable()
@@ -36,11 +22,8 @@ public class UIManager : MonoBehaviour
         ActionController.IncreaseKickForce += UpdateKickForceUI;
         ActionController.UpdateChargeLevelUI += UpdateChargeLevelUI;
         ActionController.OnLevelStart += CloseStartUI;
-        ActionController.OnLevelRestart += CloseFinishUI;
-        ActionController.OnLevelRestart += CloseKickForceUI;
         ActionController.FinishLevel += OpenFinishUI;
-        ActionController.OpenKickForceUI += UpdateKickForceUI ;
-
+        ActionController.OnLevelRestart += CloseFinishUI;
     }
 
     private void OnDisable()
@@ -49,42 +32,41 @@ public class UIManager : MonoBehaviour
         ActionController.IncreaseKickForce -= UpdateKickForceUI;
         ActionController.UpdateChargeLevelUI -= UpdateChargeLevelUI;
         ActionController.OnLevelStart -= CloseStartUI;
-        ActionController.OnLevelRestart -= CloseFinishUI;
-        ActionController.OnLevelRestart -= CloseKickForceUI;
         ActionController.FinishLevel -= OpenFinishUI;
-        ActionController.OpenKickForceUI -= UpdateKickForceUI;
-    }
-
-    public void OpenStartUI()
-    {
-        startUI.SetActive(true);
+        ActionController.OnLevelRestart -= CloseFinishUI;
     }
 
     public void OpenFinishUI()
     {
         finishUI.SetActive(true);
     }
+
     public void CloseStartUI()
     {
         startUI.SetActive(false);
     }
+
     public void CloseFinishUI()
     {
         finishUI.SetActive(false);
+        CloseKickForceUI();
     }
+
     public void OpenKickForceUI()
     {
         kickForce.gameObject.SetActive(true);
+        UpdateKickForceUI();
 
     }
+
     public void CloseKickForceUI()
     {
         kickForce.gameObject.SetActive(false);
-    } 
+    }
 
     public void UpdateChargeLevelUI()
     {
-        chargeLevel.value = gameManager.chargeCount / 29f; 
+        chargeLevel.value = gameManager.ChargeCount / 29f;
     }
 
     public void UpdateKickForceUI()

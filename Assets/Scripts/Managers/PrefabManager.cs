@@ -1,54 +1,18 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class PrefabManager : MonoBehaviour
+public class PrefabManager : MonoSingleton<PrefabManager>
 {
-    [SerializeField] List<PrefabData> prefabs = new List<PrefabData>();
-    public static PrefabManager Instance { get; private set; }
-  
-    private void Awake()
+    [SerializeField] private GameObject gatePrefab;
+    [SerializeField] private GameObject blockPrefab;  
+
+    public GameObject InstantiateGate(Vector3 objectPosition, Quaternion rotation, Transform parent) 
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        return Instantiate(gatePrefab, objectPosition, rotation, parent);
     }
 
-    public GameObject InstantiateObjet(PrefabType prefabType, Vector3 objectPosition, MaterialType materialType, MaterialType chargedMaterialType = MaterialType.Green, Transform parent = null)
+    public GameObject InstantiateBlock(Vector3 objectPosition, Quaternion rotation, Transform parent)
     {
-        PrefabData data = prefabs.Find(p => p.Type == prefabType);
-        GameObject newObj = Instantiate(data.Prefab, objectPosition, Quaternion.identity, parent);
-        if (prefabType == PrefabType.Gate)
-        {
-            newObj.GetComponent<Gate>().MaterialType = materialType;
-
-        }
-        else
-        {
-            Block block = newObj.GetComponent<Block>() ;
-            block.MaterialType = materialType;
-            block.ChargedMaterialType = chargedMaterialType;
-
-        }
-        return newObj;
+        return Instantiate(blockPrefab, objectPosition, rotation, parent);
     }
-}
 
-public enum PrefabType
-{
-    Gate,
-    Block,
-
-}
-
-[Serializable]
-public class PrefabData
-{
-    public PrefabType Type;
-    public GameObject Prefab;
 }

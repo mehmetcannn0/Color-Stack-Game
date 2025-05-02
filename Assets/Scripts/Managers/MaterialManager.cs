@@ -1,24 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
-public class MaterialManager : MonoBehaviour
+public class MaterialManager : MonoSingleton<MaterialManager>
 {
-    public List<MaterialTypeData> materials = new List<MaterialTypeData>();
+    [SerializeField] private List<MaterialTypeData> materials; 
 
-    public static MaterialManager Instance;
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
+    public MaterialTypeData GetMaterialTypeData(MaterialType requestedType) => materials.FirstOrDefault(x => x.materialType == requestedType);
 }
 
 [Serializable]

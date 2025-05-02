@@ -1,24 +1,11 @@
 using System;
 using UnityEngine;
 
-public class PlayerInputManager : MonoBehaviour
+public class PlayerInputManager : MonoSingleton<PlayerInputManager>
 {
     public float HorizontalValue { get; private set; }
     public bool IsActive { get; private set; } = true;
-   
-    public static PlayerInputManager Instance;
-
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
-
+      
     private void OnEnable()
     {
         ActionController.OpenKickForceUI += ToggleIsActive;
@@ -47,10 +34,7 @@ public class PlayerInputManager : MonoBehaviour
                     case TouchPhase.Began:
                         ActionController.IncreaseKickForce?.Invoke();
                         break;
-
-
                 }
-                //IncreaseKickForce();
             }
             HorizontalValue = 0;
         }
@@ -64,17 +48,17 @@ public class PlayerInputManager : MonoBehaviour
 
             if (touch.phase == TouchPhase.Moved)
             {
-                HorizontalValue = touch.deltaPosition.x * 3f * Time.deltaTime;
+                HorizontalValue = touch.deltaPosition.x * Utils.TOUCH_SENSITIVITY * Time.deltaTime;
                 return;
             }
         }
 
-        if (Input.GetMouseButton(0))
-        {
-            float deltaX = Input.GetAxis("Mouse X");
-            HorizontalValue = deltaX * 500f * Time.deltaTime;
-            return;
-        }
+        //if (Input.GetMouseButton(0))
+        //{
+        //    float deltaX = Input.GetAxis("Mouse X");
+        //    HorizontalValue = deltaX * Utils.MOUSE_SENSITIVITY * Time.deltaTime;
+        //    return;
+        //}
 
         HorizontalValue = 0;
     }

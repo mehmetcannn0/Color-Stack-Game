@@ -3,8 +3,7 @@ using UnityEngine;
 
 public class PlayerInputController : MonoBehaviour
 {
-    public float forwardMovementSpeed = 0;
-    private float horizontalLimitValue = 4;
+    private float forwardMovementSpeed = 0;
     private float horizontalMovementSpeed = 0;
     private float newPositionHorizontalValue;
 
@@ -48,27 +47,25 @@ public class PlayerInputController : MonoBehaviour
         if (playerInputManager.IsActive)
         {
             newPositionHorizontalValue = transform.position.x + playerInputManager.HorizontalValue * horizontalMovementSpeed * Time.fixedDeltaTime;
-            newPositionHorizontalValue = Mathf.Clamp(newPositionHorizontalValue, horizontalLimitValue - 8, horizontalLimitValue);
+            newPositionHorizontalValue = Mathf.Clamp(newPositionHorizontalValue, -Utils.HORIZONTAL_LIMIT_VALUE, Utils.HORIZONTAL_LIMIT_VALUE);
             transform.position = new Vector3(newPositionHorizontalValue, transform.position.y, transform.position.z);
         }
     }
 
     public void StopPlayer()
     {
-        playerAnimator.SetBool("Run", false);
         forwardMovementSpeed = 0f;
         horizontalMovementSpeed = 0f;
     }
 
     public void RunPlayer()
     {
-        playerAnimator.SetBool("Run", true);
-        horizontalMovementSpeed = 10f;
-        forwardMovementSpeed = 10f;
+        horizontalMovementSpeed = Utils.HORIZONTAL_MOVEMENT_SPEED_VALUE;
+        forwardMovementSpeed = Utils.FORWARD_MOVEMENT_SPEED_VALUE;
     }
     public void SetPlayerPosition()
     {
-        transform.position = new Vector3(0, 0, -6);
+        transform.position = Utils.PLAYER_START_POSITION;
     }
 }
 

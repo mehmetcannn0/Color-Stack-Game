@@ -10,8 +10,8 @@ public class Block : MonoBehaviour, IStackable, IColorChangeable
 
     private Material blockMaterial;
 
-    public MaterialType MaterialType;
-    public MaterialType ChargedMaterialType;
+    private MaterialType MaterialType;
+    private MaterialType ChargedMaterialType;
 
     MaterialManager materialManager;
     GameManager gameManager;
@@ -24,25 +24,10 @@ public class Block : MonoBehaviour, IStackable, IColorChangeable
 
     private void Start()
     {
-        switch (MaterialType)
-        {
-            case MaterialType.Red:
-                blockRenderer.material = materialManager.materials[0].material;
-                blockMaterial = blockRenderer.material;
-                break;
-            case MaterialType.Green:
-                blockRenderer.material = materialManager.materials[1].material;
-                blockMaterial = blockRenderer.material;
-                break;
-            case MaterialType.Blue:
-                blockRenderer.material = materialManager.materials[2].material;
-                blockMaterial = blockRenderer.material;
-                break;
-            case MaterialType.Yellow:
-                blockRenderer.material = materialManager.materials[3].material;
-                blockMaterial = blockRenderer.material;
-                break;
-        }
+        MaterialTypeData requestedMaterialData = materialManager.GetMaterialTypeData(MaterialType);
+
+        blockRenderer.material = requestedMaterialData.material;
+        blockMaterial = requestedMaterialData.material;
     }
 
     private void OnEnable()
@@ -61,6 +46,12 @@ public class Block : MonoBehaviour, IStackable, IColorChangeable
         ActionController.AddForce -= AddForce;
     }
 
+    public void Init(MaterialType blockMaterialType, MaterialType gateMaterialType)
+    {
+        MaterialType = blockMaterialType;
+        ChargedMaterialType = gateMaterialType;
+    }
+
     private void OnGateInteracted(Material material)
     {
         if (!IsStacked)
@@ -73,21 +64,8 @@ public class Block : MonoBehaviour, IStackable, IColorChangeable
         if (IsStacked)
             return;
 
-        switch (ChargedMaterialType)
-        {
-            case MaterialType.Red:
-                blockRenderer.material = materialManager.materials[0].material;
-                break;
-            case MaterialType.Green:
-                blockRenderer.material = materialManager.materials[1].material;
-                break;
-            case MaterialType.Blue:
-                blockRenderer.material = materialManager.materials[2].material;
-                break;
-            case MaterialType.Yellow:
-                blockRenderer.material = materialManager.materials[3].material;
-                break;
-        }
+        MaterialTypeData requestedMaterialType = materialManager.GetMaterialTypeData(ChargedMaterialType);
+        blockRenderer.material = requestedMaterialType.material;
     }
 
     public void OnUncharged()

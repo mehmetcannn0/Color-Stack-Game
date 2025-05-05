@@ -7,13 +7,15 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private Transform gateParent;
     [SerializeField] private Transform blockParent;
     [SerializeField] private Transform stackParent;
+    [SerializeField] private Transform coinsParent;
 
     PrefabManager prefabManager;
+
+    private float[] possibleX = { -3.45f, -1f, 1f, 3.45f };
 
     void Start()
     {
         prefabManager = PrefabManager.Instance;
-
     }
 
     private void OnEnable()
@@ -31,6 +33,8 @@ public class LevelManager : MonoBehaviour
     public void CreateLevel()
     {
         ClearLevel();
+
+        PlaceCoins();
 
         MaterialType gateMaterialType = MaterialType.Green;
         MaterialType[] columnMaterialTypes = new MaterialType[Utils.COLUMN_COUNT];
@@ -53,7 +57,7 @@ public class LevelManager : MonoBehaviour
                     columnMaterialTypes[col] = (MaterialType)Random.Range(0, 4);
                 }
                 if (!columnMaterialTypes.Contains(gateMaterialType))
-                { 
+                {
                     int selectedColumnIndex = Random.Range(0, Utils.COLUMN_COUNT);
                     columnMaterialTypes[selectedColumnIndex] = gateMaterialType;
                 }
@@ -90,6 +94,23 @@ public class LevelManager : MonoBehaviour
         gateObject.GetComponent<Gate>().Init(materialType);
     }
 
+    public void PlaceCoins()
+    {
+        for (int g = 1; g < 50; g++)
+        {
+            float x = possibleX[Random.Range(0, possibleX.Length)];
+            float zStart = g * 4f;
+
+            for (int z = 0; z < 5; z++)
+            {
+                for (int y = 0; y < 4; y++)
+                {
+                    Vector3 position = new Vector3(x, y, zStart + z);
+                    prefabManager.InstantiateCoin(position, Quaternion.identity, coinsParent);
+                }
+            }
+        }
+    }
 
     public void ClearLevel()
     {
@@ -102,6 +123,10 @@ public class LevelManager : MonoBehaviour
             Destroy(child.gameObject);
         }
         foreach (Transform child in stackParent)
+        {
+            Destroy(child.gameObject);
+        }
+        foreach (Transform child in coinsParent)
         {
             Destroy(child.gameObject);
         }

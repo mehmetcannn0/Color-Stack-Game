@@ -25,7 +25,6 @@ public class Block : MonoBehaviour, IStackable, IColorChangeable
     private void Start()
     {
         MaterialTypeData requestedMaterialData = materialManager.GetMaterialTypeData(MaterialType);
-
         blockRenderer.material = requestedMaterialData.material;
         blockMaterial = requestedMaterialData.material;
     }
@@ -59,6 +58,7 @@ public class Block : MonoBehaviour, IStackable, IColorChangeable
 
         blockRenderer.material = material;
     }
+
     public void OnCharged()
     {
         if (IsStacked)
@@ -87,6 +87,7 @@ public class Block : MonoBehaviour, IStackable, IColorChangeable
     public void OnStack()
     {
         IsStacked = true;
+        ActionController.UpdateScore?.Invoke(1f);
     }
 
     public MaterialType GetMaterialType()

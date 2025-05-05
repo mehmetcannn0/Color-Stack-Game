@@ -5,15 +5,36 @@ public class LevelController : MonoBehaviour
 {
     [SerializeField] LevelManager levelManager;
 
+    GameManager gameManager;
+
+
+    private void Start()
+    {
+        gameManager = GameManager.Instance;
+    }
     public void StartLevel()
     {
-        ActionController.OnLevelStart?.Invoke();
+        if (!string.IsNullOrWhiteSpace(gameManager.PlayerName))
+        {
+            ActionController.OnLevelStart?.Invoke();
+        }
+        else
+        {
+            ActionController.OnPopUpOpened?.Invoke();
+        }
     }
 
     public void RestartLevel()
     {
-        ActionController.OnLevelRestart?.Invoke();
-        StartLevel();
+        if (!string.IsNullOrWhiteSpace(gameManager.PlayerName))
+        {
+            ActionController.OnLevelRestart?.Invoke();
+            StartLevel();
+        }
+        else
+        {
+            ActionController.OnPopUpOpened?.Invoke();
+        }
     }
 }
 

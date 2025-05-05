@@ -23,5 +23,11 @@ public static class Utils
 
     public const string KICK_ANIMATION_TRIGGER_NAME = "Kick";
     public const string RUN_ANIMATION_NAME = "Run";
+    public const float COIN_ANIMATION_DURATION = 0.5f;
+
+    public const float POP_UP_ANIMATION_DURATION = 0.5f;
+
+    public const string PLAYER_DATA_FILE_NAME = "/PlayerData.json";
+
 
 }

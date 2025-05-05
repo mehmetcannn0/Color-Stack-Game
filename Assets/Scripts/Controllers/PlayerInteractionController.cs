@@ -1,4 +1,5 @@
 
+using DG.Tweening;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,6 +9,9 @@ public class PlayerInteractionController : MonoSingleton<PlayerInteractionContro
     [SerializeField] private MaterialType stackBaseMaterialType;
     [SerializeField] private Transform stackParent;
 
+
+    [SerializeField] private Transform coinCollectObjectTransform;
+
     private MeshRenderer meshRenderer;
 
     private List<GameObject> stackList = new List<GameObject>();
@@ -16,23 +20,43 @@ public class PlayerInteractionController : MonoSingleton<PlayerInteractionContro
     MaterialManager materialManager;
     GameManager gameManager;
 
+    private Vector3 firstLocalPos;
+    private Vector3 firstLocalScale;
+
 
     private void Start()
     {
-        meshRenderer = GetComponent<MeshRenderer>();
+        meshRenderer = GetComponentInChildren<MeshRenderer>();
         materialManager = MaterialManager.Instance;
         gameManager = GameManager.Instance;
 
+        firstLocalPos = transform.localPosition;
+        firstLocalScale = transform.localScale;
     }
 
     private void OnEnable()
     {
         ActionController.OnLevelStart += ClearStackList;
+        ActionController.GetTopBlockObject += GetTopBlockObject;
     }
 
     private void OnDisable()
     {
         ActionController.OnLevelStart -= ClearStackList;
+        ActionController.GetTopBlockObject -= GetTopBlockObject;
+    }
+
+    private GameObject GetTopBlockObject()
+    {
+        if (stackList.Count > 0)
+        {
+            return stackList[^1];
+        }
+
+        GameObject newObject = new GameObject("TopBlock");
+        newObject.transform.position = stackParent.position;
+
+        return newObject;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -40,8 +64,20 @@ public class PlayerInteractionController : MonoSingleton<PlayerInteractionContro
         if (!PlayerInputManager.Instance.IsActive)
             return;
 
+
         if (collision.gameObject.TryGetComponent(out IFinishLevel finishLevel))
         {
+            GameObject lastBlock = null;
+
+            try
+            {
+                lastBlock = stackList[^1];
+            }
+            catch
+            {
+                Debug.Log("Stack is empty");
+            }
+
             finishLevel.FinishLevel();
             return;
         }
@@ -74,13 +110,20 @@ public class PlayerInteractionController : MonoSingleton<PlayerInteractionContro
     {
         gameManager.DecreaseChargeCount(true);
         ActionController.UpdateChargeLevelUI?.Invoke();
-        RemoveFromStack();
+        ActionController.UpdateScore?.Invoke(-1f);
+
+        if (stackList.Count > 0)
+        {
+            RemoveFromStack();
+        }
         Destroy(collision.gameObject);
     }
 
     private void SetActiveCharge()
     {
         transform.localScale = Utils.CHARGED_STACK_BASE_SCALE;
+        coinCollectObjectTransform.localScale = new Vector3(8, 1, 1);
+
 
         isCharged = true;
         ActionController.OnCharged?.Invoke();
@@ -104,11 +147,13 @@ public class PlayerInteractionController : MonoSingleton<PlayerInteractionContro
 
         if (gameManager.ChargeCount <= 0)
         {
-            transform.localScale = Utils.STACK_BASE_SCALE;
+            transform.localScale = firstLocalScale;
+            coinCollectObjectTransform.localScale = Vector3.one;
+            //transform.localPosition = firstLocalPos;
             isCharged = false;
             ActionController.OnUncharged?.Invoke();
         }
-        return;
+
     }
 
     private void OnTriggerEnter(Collider other)
@@ -142,18 +187,17 @@ public class PlayerInteractionController : MonoSingleton<PlayerInteractionContro
 
     void RemoveFromStack()
     {
-        if (stackList.Count > 0)
-        {
-            GameObject topBlock = stackList[stackList.Count - 1];
-            stackList.RemoveAt(stackList.Count - 1);
-            Destroy(topBlock);
-        }
+        GameObject topBlock = stackList[^1];
+        stackList.Remove(topBlock);
+        Destroy(topBlock);
     }
 
     private void ClearStackList()
     {
         stackList.Clear();
         isCharged = false;
-        transform.localScale = Utils.STACK_BASE_SCALE;
+        transform.localScale = firstLocalScale;
+        transform.localPosition = firstLocalPos;
+        coinCollectObjectTransform.localScale = Vector3.one;
     }
 }

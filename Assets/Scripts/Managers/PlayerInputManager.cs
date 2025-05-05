@@ -9,13 +9,15 @@ public class PlayerInputManager : MonoSingleton<PlayerInputManager>
     private void OnEnable()
     {
         ActionController.OpenKickForceUI += ToggleIsActive;
-        ActionController.OnLevelRestart += ToggleIsActive;
+        //ActionController.OnLevelRestart += ToggleIsActive;
+        ActionController.AddForce += ToggleIsActive;
     }
 
     private void OnDisable()
     {
         ActionController.OpenKickForceUI -= ToggleIsActive;
-        ActionController.OnLevelRestart -= ToggleIsActive;
+        //ActionController.OnLevelRestart -= ToggleIsActive;
+        ActionController.AddForce -= ToggleIsActive;
     }
 
     void Update()

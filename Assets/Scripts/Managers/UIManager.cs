@@ -12,11 +12,11 @@ public class UIManager : MonoSingleton<UIManager>
     [SerializeField] private GameObject startUI;
     [SerializeField] private GameObject finishUI;
     [SerializeField] public RectTransform TargetCoinUI;
-    [SerializeField] TextMeshProUGUI coinUI;
-    [SerializeField] TextMeshProUGUI scoreUI;
-    [SerializeField] GameObject leaderboardUI;
-    public GameObject PopUpUI;
-
+    [SerializeField] private TextMeshProUGUI coinUI;
+    [SerializeField] private TextMeshProUGUI scoreUI;
+    [SerializeField] private GameObject leaderboardUI;
+    [SerializeField] private GameObject popUpUI;
+    [SerializeField] private GameObject gameOverUI;
 
     GameManager gameManager;
 
@@ -36,6 +36,7 @@ public class UIManager : MonoSingleton<UIManager>
         ActionController.UpdateCoinUI += UpdateCoinUI;
         ActionController.UpdateScoreUI += UpdateScoreUI;
         ActionController.OnPopUpOpened += OpenPopUp;
+        ActionController.OnGameOver += GameOver;
 
     }
 
@@ -50,13 +51,20 @@ public class UIManager : MonoSingleton<UIManager>
         ActionController.UpdateCoinUI -= UpdateCoinUI;
         ActionController.UpdateScoreUI -= UpdateScoreUI;
         ActionController.OnPopUpOpened -= OpenPopUp;
+        ActionController.OnGameOver -= GameOver;
+    }
+
+    public void GameOver()
+    {
+        chargeLevel.gameObject.SetActive(false);
+        gameOverUI.SetActive(true);
+        ActionController.FinishLevel?.Invoke();
+        ActionController.UpdateLeaderboard?.Invoke();
     }
 
     public void OpenFinishUI()
     {
-        SaveData.Instance.SavePlayerData();
-
-
+        DOTween.KillAll();
         finishUI.SetActive(true);
         OpenLeaderboardUI();
     }
@@ -64,18 +72,20 @@ public class UIManager : MonoSingleton<UIManager>
     public void CloseStartUI()
     {
         startUI.SetActive(false);
+        chargeLevel.gameObject.SetActive(true);
         leaderboardUI.SetActive(false);
-
     }
 
     public void CloseFinishUI()
     {
+        gameOverUI.SetActive(false);
         finishUI.SetActive(false);
         CloseKickForceUI();
     }
 
     public void OpenKickForceUI()
     {
+        chargeLevel.gameObject.SetActive(false);
         kickForce.gameObject.SetActive(true);
         UpdateKickForceUI();
     }
@@ -108,9 +118,9 @@ public class UIManager : MonoSingleton<UIManager>
     public void OpenPopUp()
     {
         StopAllCoroutines();
-        PopUpUI.transform.localScale = Vector3.zero;
-        PopUpUI.SetActive(true);
-        PopUpUI.transform.DOScale(1, Utils.POP_UP_ANIMATION_DURATION).OnComplete(() =>
+        popUpUI.transform.localScale = Vector3.zero;
+        popUpUI.SetActive(true);
+        popUpUI.transform.DOScale(1, Utils.POP_UP_ANIMATION_DURATION).OnComplete(() =>
         {
             StartCoroutine(ClosePopUpAfterDelay(2f));
         });
@@ -119,17 +129,17 @@ public class UIManager : MonoSingleton<UIManager>
     private IEnumerator ClosePopUpAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-        PopUpUI.transform.DOScale(0, Utils.POP_UP_ANIMATION_DURATION).OnComplete(() =>
+        popUpUI.transform.DOScale(0, Utils.POP_UP_ANIMATION_DURATION).OnComplete(() =>
         {
-            PopUpUI.SetActive(false);
+            popUpUI.SetActive(false);
         });
     }
 
     public void OpenLeaderboardUI()
     {
+        SaveData.Instance.SavePlayerData();
         leaderboardUI.SetActive(true);
     }
-     
 }
 
 public static partial class ActionController
@@ -139,4 +149,5 @@ public static partial class ActionController
     public static Action UpdateCoinUI;
     public static Action UpdateScoreUI;
     public static Action OnPopUpOpened;
+    public static Action OnGameOver;
 }

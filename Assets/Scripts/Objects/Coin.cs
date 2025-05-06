@@ -31,6 +31,7 @@ public class Coin : MonoBehaviour, ICollectable
     {
         ActionController.OnCoinCollected?.Invoke();
         PlayCoinCollectAnimation();
+        DOTween.Kill(transform);
         Destroy(gameObject);
     }
 

@@ -7,11 +7,11 @@ public class LevelController : MonoBehaviour
 
     GameManager gameManager;
 
-
     private void Start()
     {
         gameManager = GameManager.Instance;
     }
+
     public void StartLevel()
     {
         if (!string.IsNullOrWhiteSpace(gameManager.PlayerName))

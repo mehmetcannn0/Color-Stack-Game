@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlayerInputController : MonoBehaviour
 {
-    private float forwardMovementSpeed = 0;
+    [SerializeField] private float forwardMovementSpeed = 0;
     private float horizontalMovementSpeed = 0;
     private float newPositionHorizontalValue;
 
@@ -22,6 +22,7 @@ public class PlayerInputController : MonoBehaviour
         ActionController.StopPlayer += StopPlayer;
         ActionController.OnLevelStart += RunPlayer;
         ActionController.OnLevelRestart += SetPlayerPosition;
+        ActionController.OnGameOver += StopPlayer;
     }
 
     private void OnDisable()
@@ -29,6 +30,7 @@ public class PlayerInputController : MonoBehaviour
         ActionController.StopPlayer -= StopPlayer;
         ActionController.OnLevelStart -= RunPlayer;
         ActionController.OnLevelRestart -= SetPlayerPosition;
+        ActionController.OnGameOver -= StopPlayer;
     }
 
     private void FixedUpdate()
@@ -39,7 +41,7 @@ public class PlayerInputController : MonoBehaviour
 
     private void PlayerForwardMovement()
     {
-        transform.Translate(Vector3.forward * forwardMovementSpeed * Time.fixedDeltaTime);
+        transform.Translate(forwardMovementSpeed * Time.fixedDeltaTime * Vector3.forward);
     }
 
     public void PlayerHorizontalMovement()

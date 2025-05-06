@@ -1,4 +1,4 @@
 public interface IFinishLevel  
 {
-    void FinishLevel();
+    void FinishLevel(bool isStop =true);
 }

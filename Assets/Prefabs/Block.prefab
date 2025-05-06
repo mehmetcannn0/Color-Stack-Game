@@ -119,11 +119,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd06c817416cf0242a35b8a760156023, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <IsStacked>k__BackingField: 0
   blockRenderer: {fileID: 3633994209333864521}
   blockRigidbody: {fileID: 4305247862902894320}
-  materialType: 2
-  chargedMaterialType: 0
+  boxCollider: {fileID: 2879565590161059461}
 --- !u!54 &4305247862902894320
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -132,7 +130,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4054689488738391482}
   serializedVersion: 4
-  m_Mass: 0.5
+  m_Mass: 0.35
   m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}

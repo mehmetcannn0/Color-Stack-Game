@@ -1,39 +1,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SaveData : MonoBehaviour
+public class SaveData : MonoSingleton<SaveData>
 {
     GameManager gameManager;
     public Leaderboard Leaderboard = new Leaderboard();
-    public static SaveData Instance;
 
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
     private void Start()
     {
         gameManager = GameManager.Instance;
-        //ActionController.FinishLevel += LoadFromJson;
     }
 
-    private void OnDestroy()
-    {
-        //ActionController.FinishLevel -= LoadFromJson;
-
-    }
     public void SaveToJson()
     {
-        string leaderboardData = JsonUtility.ToJson(Leaderboard, true); 
+        string leaderboardData = JsonUtility.ToJson(Leaderboard, true);
         string filePath = Application.persistentDataPath + Utils.PLAYER_DATA_FILE_NAME;
         System.IO.File.WriteAllText(filePath, leaderboardData);
-        Debug.Log("data kaydedýldý"); 
     }
 
     public void LoadFromJson()
@@ -43,7 +25,6 @@ public class SaveData : MonoBehaviour
         {
             string jsonData = System.IO.File.ReadAllText(filePath);
             Leaderboard = JsonUtility.FromJson<Leaderboard>(jsonData);
-            Debug.Log("data çekildi");
         }
         else
         {
@@ -60,7 +41,6 @@ public class SaveData : MonoBehaviour
         SaveToJson();
         LoadFromJson();
     }
-
 }
 
 [System.Serializable]

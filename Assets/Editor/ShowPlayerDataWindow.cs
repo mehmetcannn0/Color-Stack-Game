@@ -5,6 +5,8 @@ using UnityEngine;
 public class ShowPlayerDataWindow : EditorWindow
 {
     private PlayerList playerList;
+    private Vector2 scrollPos;
+
 
     [MenuItem("Tools/Player Tools/Oyuncu Verilerini Göster-Sil")]
     public static void ShowWindow()
@@ -14,6 +16,7 @@ public class ShowPlayerDataWindow : EditorWindow
 
     private void OnEnable()
     {
+
         LoadPlayerData();
     }
 
@@ -34,7 +37,7 @@ public class ShowPlayerDataWindow : EditorWindow
             playerList = null;
         }
     }
-    public  void DeletePlayerDataFile()
+    public void DeletePlayerDataFile()
     {
         string filePath = Application.persistentDataPath + "/PlayerData.json";
 
@@ -51,9 +54,28 @@ public class ShowPlayerDataWindow : EditorWindow
         }
     }
 
-
     private void OnGUI()
     {
+        if (EditorApplication.isPlaying)
+        {
+            EditorGUILayout.HelpBox("Bu pencere Play Mode'da çalýþmaz.", MessageType.Warning);
+            return;
+        }
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("Veriyi Yeniden Yükle"))
+        {
+            LoadPlayerData();
+        }
+
+        if (GUILayout.Button("Oyuncu Verilerini Sil"))
+        {
+            DeletePlayerDataFile();
+            LoadPlayerData();
+        }
+        EditorGUILayout.EndHorizontal();
+
+        EditorGUILayout.Space();
+
         if (playerList == null || playerList.Players == null)
         {
             EditorGUILayout.HelpBox("Oyuncu verisi yüklenemedi!", MessageType.Warning);
@@ -67,6 +89,8 @@ public class ShowPlayerDataWindow : EditorWindow
         EditorGUILayout.LabelField("Oyuncu Listesi", EditorStyles.boldLabel);
         EditorGUILayout.Space();
 
+        scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+
         foreach (PlayerData player in playerList.Players)
         {
             EditorGUILayout.BeginVertical("box");
@@ -76,17 +100,9 @@ public class ShowPlayerDataWindow : EditorWindow
             EditorGUILayout.EndVertical();
         }
 
-        if (GUILayout.Button("Veriyi Yeniden Yükle"))
-        {
-            LoadPlayerData();
-        }
-
-        if (GUILayout.Button("Oyuncu Verilerini Sil"))
-        {
-            DeletePlayerDataFile();
-            LoadPlayerData();   
-        }
+        EditorGUILayout.EndScrollView();
     }
+
 }
 
 [System.Serializable]

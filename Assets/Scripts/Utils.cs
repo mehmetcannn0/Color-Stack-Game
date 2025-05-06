@@ -9,7 +9,7 @@ public static class Utils
     public const float FORWARD_MOVEMENT_SPEED_VALUE = 10f;
 
     public const float HORIZONTAL_LIMIT_VALUE = 4;
-    public static Vector3 PLAYER_START_POSITION = new Vector3(0, 0, -6);
+    public static Vector3 PLAYER_START_POSITION = new Vector3(0, 0, -22);
 
     public const int COLUMN_COUNT = 4;
     public const float BLOCK_HORIZONTAL_SPACE_SIZE = 2.3f;

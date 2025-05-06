@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 public class GameManager : MonoSingleton<GameManager>
 {
@@ -8,7 +7,7 @@ public class GameManager : MonoSingleton<GameManager>
     public float CoinCount { get; private set; }
     public float Score { get; private set; }
     public float BonusMultiplier { get; private set; } = 1f;
-    public string PlayerName { get; private set; }  
+    public string PlayerName { get; private set; }
 
     private void OnEnable()
     {
@@ -17,7 +16,7 @@ public class GameManager : MonoSingleton<GameManager>
         ActionController.OnCoinCollected += AddCoin;
         ActionController.UpdateScore += UpdateScore;
         ActionController.SetBonusMultiplier += SetBonusMultiplier;
-        ActionController.FinishLevel += AddBonusCoin;
+        ActionController.AddBonus += AddBonusCoin;
     }
 
     private void OnDisable()
@@ -27,7 +26,7 @@ public class GameManager : MonoSingleton<GameManager>
         ActionController.OnCoinCollected -= AddCoin;
         ActionController.UpdateScore -= UpdateScore;
         ActionController.SetBonusMultiplier -= SetBonusMultiplier;
-        ActionController.FinishLevel -= AddBonusCoin;
+        ActionController.AddBonus -= AddBonusCoin;
     }
 
     private void IncreaseKickForce()
@@ -69,6 +68,7 @@ public class GameManager : MonoSingleton<GameManager>
         CoinCount = 0f;
         Score = 0f;
         BonusMultiplier = 1f;
+
         ActionController.UpdateScoreUI?.Invoke();
         ActionController.UpdateCoinUI?.Invoke();
         ActionController.UpdateChargeLevelUI?.Invoke();
@@ -78,19 +78,19 @@ public class GameManager : MonoSingleton<GameManager>
     {
         if (BonusMultiplier < value)
         {
-            //Debug.Log("value: " + value + " Current Bonus Multiplier: " + BonusMultiplier);
-           
             BonusMultiplier = value;
-
         }
     }
 
     public void AddBonusCoin()
     {
         CoinCount += Score * BonusMultiplier;
-        ActionController.UpdateCoinUI?.Invoke();
 
+        ActionController.UpdateCoinUI?.Invoke();
+        ActionController.FinishLevel?.Invoke();
+        ActionController.UpdateLeaderboard?.Invoke();
     }
+
     public void UpdatePlayerName(string value)
     {
         PlayerName = value;
@@ -99,9 +99,8 @@ public class GameManager : MonoSingleton<GameManager>
 
 public static partial class ActionController
 {
+    public static Action AddBonus;
     public static Action OnCoinCollected;
     public static Action<float> UpdateScore;
     public static Action<float> SetBonusMultiplier;
-
-
 }

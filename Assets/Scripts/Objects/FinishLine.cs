@@ -2,31 +2,27 @@ using System.Collections;
 using UnityEngine;
 
 public class FinishLine : MonoBehaviour, IFinishLevel
-{ 
-    public void FinishLevel()
+{
+    public void FinishLevel(bool isStop = true)
     {
+        if (!isStop)
+        {
+            ActionController.OpenKickForceUI?.Invoke();
+            return;
+        }
+
         StartCoroutine(FinishSequence());
     }
 
     IEnumerator FinishSequence()
     {
-        ActionController.OpenKickForceUI?.Invoke();
-         
-        yield return new WaitForSeconds(2f);
-
-        ActionController.StopPlayer?.Invoke();         
-
         yield return new WaitForSeconds(0.7f);
 
         ActionController.AddForce?.Invoke();
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(3.5f);
 
-        ActionController.OnFollowTopBlock?.Invoke();
+        ActionController.AddBonus?.Invoke();
 
-        yield return new WaitForSeconds(2.5f);
-
-        ActionController.FinishLevel?.Invoke();         
-        ActionController.UpdateLeaderboard?.Invoke();
     }
 }

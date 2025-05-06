@@ -83,14 +83,12 @@ public class LevelManager : MonoBehaviour
         GameObject blockObject = prefabManager.InstantiateBlock(blockPosition, Quaternion.identity, blockParent);
 
         Block block = blockObject.GetComponent<Block>();
-
         block.Init(blockMaterialType, gateMaterialType);
     }
 
     private void PlaceGate(MaterialType materialType, float gatePositionIndex)
     {
         GameObject gateObject = prefabManager.InstantiateGate(new Vector3(0f, 0f, gatePositionIndex), Quaternion.identity, gateParent);
-
         gateObject.GetComponent<Gate>().Init(materialType);
     }
 

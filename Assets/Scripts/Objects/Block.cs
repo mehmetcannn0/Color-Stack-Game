@@ -3,10 +3,11 @@ using UnityEngine;
 
 public class Block : MonoBehaviour, IStackable, IColorChangeable
 {
-    [field: SerializeField] public bool IsStacked { get; private set; }
+    private bool isStacked;
 
     [SerializeField] MeshRenderer blockRenderer;
     [SerializeField] Rigidbody blockRigidbody;
+    [SerializeField] BoxCollider boxCollider;
 
     private Material blockMaterial;
 
@@ -31,17 +32,16 @@ public class Block : MonoBehaviour, IStackable, IColorChangeable
 
     private void OnEnable()
     {
-        ActionController.OnGateInteracted += OnGateInteracted;
         ActionController.OnCharged += OnCharged;
         ActionController.OnUncharged += OnUncharged;
-        ActionController.AddForce += AddForce;
     }
 
     private void OnDisable()
     {
-        ActionController.OnGateInteracted -= OnGateInteracted;
         ActionController.OnCharged -= OnCharged;
         ActionController.OnUncharged -= OnUncharged;
+
+        ActionController.OnGateInteracted -= OnGateInteracted;
         ActionController.AddForce -= AddForce;
     }
 
@@ -51,17 +51,18 @@ public class Block : MonoBehaviour, IStackable, IColorChangeable
         ChargedMaterialType = gateMaterialType;
     }
 
-    private void OnGateInteracted(Material material)
+    private void OnGateInteracted(MaterialTypeData materialTypeData)
     {
-        if (!IsStacked)
+        if (!isStacked)
             return;
 
-        blockRenderer.material = material;
+        blockRenderer.material = materialTypeData.material;
+        MaterialType = materialTypeData.materialType;
     }
 
     public void OnCharged()
     {
-        if (IsStacked)
+        if (isStacked)
             return;
 
         MaterialTypeData requestedMaterialType = materialManager.GetMaterialTypeData(ChargedMaterialType);
@@ -70,15 +71,16 @@ public class Block : MonoBehaviour, IStackable, IColorChangeable
 
     public void OnUncharged()
     {
-        if (!IsStacked)
+        if (!isStacked)
             blockRenderer.material = blockMaterial;
     }
 
     private void AddForce()
     {
-        if (!IsStacked)
+        if (!isStacked)
             return;
 
+        MakeEnableBoxCollider();
         blockRigidbody.isKinematic = false;
         blockRigidbody.velocity = Vector3.zero;
         blockRigidbody.AddForce(Vector3.forward * gameManager.KickForce + Vector3.up, ForceMode.Impulse);
@@ -86,19 +88,45 @@ public class Block : MonoBehaviour, IStackable, IColorChangeable
 
     public void OnStack()
     {
-        IsStacked = true;
+        ActionController.OnGateInteracted += OnGateInteracted;
+        ActionController.AddForce += AddForce;
+
+        MakeDisableBoxCollider();
+        isStacked = true;
         ActionController.UpdateScore?.Invoke(1f);
+    }
+
+    public void MakeDisableBoxCollider()
+    {
+        boxCollider.enabled = false;
+    }
+
+    public void MakeEnableBoxCollider()
+    {
+        boxCollider.enabled = true;
     }
 
     public MaterialType GetMaterialType()
     {
         return MaterialType;
     }
+
+    public void DestroyBlock()
+    {
+
+
+        Destroy(gameObject);
+    }
+
+    public bool IsStacked()
+    {
+        return isStacked;
+    }
 }
 
 public static partial class ActionController
 {
-    public static Action<Material> OnGateInteracted { get; set; }
+    public static Action<MaterialTypeData> OnGateInteracted { get; set; }
     public static Action OnCharged { get; set; }
     public static Action OnUncharged { get; set; }
 

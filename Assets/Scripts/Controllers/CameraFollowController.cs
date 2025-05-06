@@ -13,14 +13,18 @@ public class CameraFollowController : MonoBehaviour
 
     private void OnEnable()
     {
-        ActionController.OnFollowTopBlock += ToggleIsFinished;
+        ActionController.AddForce += ToggleIsFinished;
         ActionController.OnLevelRestart += ToggleIsFinished;
+        ActionController.OnLevelRestart += SetNullTopBlock;
+        ActionController.OnGameOver += ToggleIsFinished;
     }
 
     private void OnDisable()
     {
-        ActionController.OnFollowTopBlock -= ToggleIsFinished;
+        ActionController.AddForce -= ToggleIsFinished;
         ActionController.OnLevelRestart -= ToggleIsFinished;
+        ActionController.OnLevelRestart -= SetNullTopBlock;
+        ActionController.OnGameOver -= ToggleIsFinished;
     }
 
     private void ToggleIsFinished()
@@ -56,16 +60,17 @@ public class CameraFollowController : MonoBehaviour
             topBlockPosition = ActionController.GetTopBlockObject?.Invoke();
 
         newPosition = Vector3.Lerp(transform.position, new Vector3(topBlockPosition.transform.position.x, topBlockPosition.transform.position.y, topBlockPosition.transform.position.z) + cameraOffset, lerpValue * Time.deltaTime);
-        //  newPosition = Vector3.Lerp(transform.position, new Vector3(0f, playerTransform.position.y, playerTransform.position.z) + cameraOffset, lerpValue * Time.deltaTime);
-
         transform.position = newPosition;
+    }
+    private void SetNullTopBlock()
+    {
+        Destroy(topBlockPosition);
+        topBlockPosition = null;
     }
 }
 
 public static partial class ActionController
 {
     public static Action<GameObject> OnTopBlockSet;
-    public static Action OnFollowTopBlock;
-
     public static Func<GameObject> GetTopBlockObject;
 }

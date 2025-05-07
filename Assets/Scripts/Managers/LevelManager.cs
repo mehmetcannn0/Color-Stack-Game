@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -126,6 +127,7 @@ public class LevelManager : MonoBehaviour
         }
         foreach (Transform child in coinsParent)
         {
+            DOTween.Kill(child);
             Destroy(child.gameObject);
         }
     }

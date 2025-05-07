@@ -8,28 +8,26 @@ public class CameraFollowController : MonoBehaviour
 
     private Vector3 cameraOffset;
     private Vector3 newPosition;
-    private bool isFinished = false;
+    private bool isFinished;
     private GameObject topBlockPosition;
 
     private void OnEnable()
     {
-        ActionController.AddForce += ToggleIsFinished;
-        ActionController.OnLevelRestart += ToggleIsFinished;
+        ActionController.AddForce += SetFinished;
         ActionController.OnLevelRestart += SetNullTopBlock;
-        ActionController.OnGameOver += ToggleIsFinished;
+        ActionController.OnGameOver += SetFinished;
     }
 
     private void OnDisable()
     {
-        ActionController.AddForce -= ToggleIsFinished;
-        ActionController.OnLevelRestart -= ToggleIsFinished;
+        ActionController.AddForce -= SetFinished;
         ActionController.OnLevelRestart -= SetNullTopBlock;
-        ActionController.OnGameOver -= ToggleIsFinished;
+        ActionController.OnGameOver -= SetFinished;
     }
 
-    private void ToggleIsFinished()
+    private void SetFinished()
     {
-        isFinished = !isFinished;
+        isFinished = true;
     }
 
     void Start()
@@ -66,6 +64,7 @@ public class CameraFollowController : MonoBehaviour
     {
         Destroy(topBlockPosition);
         topBlockPosition = null;
+        isFinished = false;
     }
 }
 

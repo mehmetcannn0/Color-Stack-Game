@@ -64,7 +64,7 @@ public class UIManager : MonoSingleton<UIManager>
 
     public void OpenFinishUI()
     {
-        DOTween.KillAll();
+       // DOTween.KillAll();
         finishUI.SetActive(true);
         OpenLeaderboardUI();
     }

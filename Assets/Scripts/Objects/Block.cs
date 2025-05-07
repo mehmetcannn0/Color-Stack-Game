@@ -126,9 +126,9 @@ public class Block : MonoBehaviour, IStackable, IColorChangeable
 
 public static partial class ActionController
 {
-    public static Action<MaterialTypeData> OnGateInteracted { get; set; }
-    public static Action OnCharged { get; set; }
-    public static Action OnUncharged { get; set; }
+    public static Action<MaterialTypeData> OnGateInteracted;
+    public static Action OnCharged;
+    public static Action OnUncharged;
 
     public static Action AddForce;
 }
